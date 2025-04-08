@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { SimulationSection, ResponsibleParty, MisconductType, PrimaryMotivation, ConclusionData, SimulationData } from '@/types';
+import { SimulationSection, ResponsibleParty, MisconductType, PrimaryMotivation, ConclusionData, SimulationData, WitnessStatement } from '@/types';
 
 interface SimulationProps {
   simulationText: string;
@@ -536,7 +536,7 @@ export default function Simulation({ simulationText, onStartNewCase }: Simulatio
     const content = getContent();
 
     // Function to safely render content that might be an object or a string
-    const renderContent = (content: any) => {
+    const renderContent = (content: string | WitnessStatement[] | Record<string, string> | null | undefined) => {
       // Log the content to help debug
       console.log('Rendering content for section:', activeSection);
       console.log('Content type:', typeof content);

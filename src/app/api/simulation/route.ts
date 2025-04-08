@@ -3,7 +3,7 @@ import OpenAI from 'openai';
 import { cookies } from 'next/headers';
 import { decrypt } from '@/utils/encryption';
 import { POSH_TRAINING_SIMULATION_PROMPT } from '@/utils/prompts';
-import { SimulationData } from '@/types';
+import { SimulationData, WitnessStatement, ResponsibleParty, MisconductType, PrimaryMotivation } from '@/types';
 
 
 
@@ -50,7 +50,7 @@ Format guidance:
 `;
 
 // Function to fix or complete missing fields in simulation data
-function repairSimulationData(data: any): SimulationData {
+function repairSimulationData(data: Partial<SimulationData>): SimulationData {
   // Create a new object with the template structure
   const repairedData: SimulationData = { ...EMPTY_TEMPLATE };
   
@@ -66,7 +66,7 @@ function repairSimulationData(data: any): SimulationData {
         repairedData.witnessStatements = data.witnessStatements;
       } else if (Array.isArray(data.witnessStatements)) {
         // Convert array of witness statements to string
-        const witnessText = data.witnessStatements.map((witness: any, index: number) => {
+        const witnessText = data.witnessStatements.map((witness: WitnessStatement | string, index: number) => {
           if (typeof witness === 'string') return `Witness ${index + 1}:\n${witness}`;
           
           const name = witness.name || `Witness ${index + 1}`;
@@ -102,16 +102,16 @@ function repairSimulationData(data: any): SimulationData {
     if (typeof data.legalReferenceGuide === 'string') repairedData.legalReferenceGuide = data.legalReferenceGuide;
     
     // Handle correct answer fields
-    if (['Respondent', 'Complainant', 'Both Parties', 'Neither Party'].includes(data.correctResponsibleParty)) {
-      repairedData.correctResponsibleParty = data.correctResponsibleParty;
+    if (['Respondent', 'Complainant', 'Both Parties', 'Neither Party'].includes(data.correctResponsibleParty || '')) {
+      repairedData.correctResponsibleParty = data.correctResponsibleParty as ResponsibleParty;
     }
     
-    if (['Sexual Harassment', 'Discrimination', 'Retaliation', 'No Misconduct'].includes(data.correctMisconductType)) {
-      repairedData.correctMisconductType = data.correctMisconductType;
+    if (['Sexual Harassment', 'Discrimination', 'Retaliation', 'No Misconduct'].includes(data.correctMisconductType || '')) {
+      repairedData.correctMisconductType = data.correctMisconductType as MisconductType;
     }
     
-    if (['Genuine Complaint', 'Personal Vendetta', 'Career Advancement', 'Misunderstanding'].includes(data.correctPrimaryMotivation)) {
-      repairedData.correctPrimaryMotivation = data.correctPrimaryMotivation;
+    if (['Genuine Complaint', 'Personal Vendetta', 'Career Advancement', 'Misunderstanding'].includes(data.correctPrimaryMotivation || '')) {
+      repairedData.correctPrimaryMotivation = data.correctPrimaryMotivation as PrimaryMotivation;
     }
     
     if (typeof data.analysis === 'string') repairedData.analysis = data.analysis;
@@ -151,7 +151,7 @@ function verifySimulationData(data: SimulationData): boolean {
 }
 
 // POST API handler
-export async function POST(request: Request) {
+export async function POST() {
   try {
     const cookieStore = await cookies();
     const encryptedApiKey = cookieStore.get('openai_api_key')?.value;
