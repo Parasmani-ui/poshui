@@ -1,8 +1,6 @@
 /* General transitions */
 .transition {
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 300ms;
+  transition: all 0.3s ease;
 }
 
 /* Scale effects */
@@ -16,15 +14,18 @@
 
 /* Translation effects */
 .moveUpOnHover:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  transform: translateY(-5px);
 }
 
 .moveRightOnHover:hover {
-  transform: translateX(4px);
+  transform: translateX(5px);
 }
 
 /* Rotation effect for icon */
+.rotateIcon {
+  transition: transform 0.3s ease;
+}
+
 .group:hover .rotateIcon {
   transform: rotate(90deg);
 }

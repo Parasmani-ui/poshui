@@ -62,7 +62,6 @@ export default function Simulation({ simulationText, onStartNewCase }: Simulatio
     misconductType: '' as MisconductType,
     primaryMotivation: '' as PrimaryMotivation,
   });
-  const [startTime, setStartTime] = useState<number | null>(null);
   const [simulationData, setSimulationData] = useState<SimulationData | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
 
@@ -78,7 +77,6 @@ export default function Simulation({ simulationText, onStartNewCase }: Simulatio
       const data = JSON.parse(simulationText) as SimulationData;
       console.log('Successfully parsed simulation data:', data);
       setSimulationData(data);
-      setStartTime(Date.now());
       setParseError(null);
     } catch (error) {
       console.error('Error parsing simulation data:', error);
@@ -86,32 +84,15 @@ export default function Simulation({ simulationText, onStartNewCase }: Simulatio
     }
   }, [simulationText]);
 
-  const handleConcludeInvestigation = async () => {
-    if (!simulationData || !startTime) return;
-
-    const completionTime = Math.round((Date.now() - startTime) / 60000); // Convert to minutes
-    const isSuccessful = 
-      conclusion.responsibleParty === simulationData.correctResponsibleParty &&
-      conclusion.misconductType === simulationData.correctMisconductType &&
-      conclusion.primaryMotivation === simulationData.correctPrimaryMotivation;
-
-    try {
-      await fetch('/api/admin/stats', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          completionTime,
-          isSuccessful,
-          caseTitle: simulationData.caseOverview.split('\n')[0], // Use first line as case title
-        }),
-      });
-    } catch (error) {
-      console.error('Error updating statistics:', error);
-    }
-
+  const handleConcludeInvestigation = () => {
+    if (!simulationData) return;
     setShowConclusion(true);
+  };
+
+  // Start New Case button
+  const handleStartNewCase = () => {
+    // Just call the parent handler to go back to landing page
+    onStartNewCase();
   };
 
   // If there's a parse error, show an error message
@@ -123,7 +104,7 @@ export default function Simulation({ simulationText, onStartNewCase }: Simulatio
           <p className="text-gray-300 mb-6">{parseError}</p>
           <div className="flex justify-end space-x-4">
             <button
-              onClick={onStartNewCase}
+              onClick={handleStartNewCase}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
             >
               Start New Case
@@ -261,7 +242,7 @@ export default function Simulation({ simulationText, onStartNewCase }: Simulatio
 
       <div className="mt-auto">
         <button
-          onClick={onStartNewCase}
+          onClick={handleStartNewCase}
           className="w-full py-2 px-4 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 hover:shadow-glow-soft transition-all duration-300 flex items-center justify-center"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
@@ -428,7 +409,7 @@ export default function Simulation({ simulationText, onStartNewCase }: Simulatio
             
             <div className="pt-4">
               <button
-                onClick={onStartNewCase}
+                onClick={handleStartNewCase}
                 className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
               >
                 Start New Case
