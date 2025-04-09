@@ -74,7 +74,30 @@ export default function Simulation({ simulationText, onStartNewCase }: Simulatio
     }
     
     try {
-      const data = JSON.parse(simulationText) as SimulationData;
+      // First, validate that the string is valid JSON
+      let data: SimulationData;
+      
+      try {
+        data = JSON.parse(simulationText) as SimulationData;
+      } catch (initialParseError) {
+        console.error('Initial JSON parsing error:', initialParseError);
+        
+        // Try to find JSON in the response if there's extra text
+        const jsonMatch = simulationText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          try {
+            console.log('Attempting to extract JSON from text');
+            const extractedJson = jsonMatch[0];
+            data = JSON.parse(extractedJson) as SimulationData;
+          } catch (extractError) {
+            console.error('Failed to extract valid JSON:', extractError);
+            throw new Error('Invalid JSON format in simulation data');
+          }
+        } else {
+          throw new Error('Could not find valid JSON in the response');
+        }
+      }
+      
       console.log('Successfully parsed simulation data:', data);
       setSimulationData(data);
       setParseError(null);

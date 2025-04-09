@@ -17,16 +17,48 @@ export default function Home() {
     try {
       const response = await fetch('/api/simulation', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
       
+      // Handle non-200 responses
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to generate simulation');
+        const errorText = await response.text();
+        let errorMessage = `Error: ${response.status} ${response.statusText}`;
+        
+        try {
+          // Try to parse the error as JSON
+          const errorData = JSON.parse(errorText);
+          if (errorData.error) {
+            errorMessage = errorData.error;
+          }
+        } catch (e) {
+          // If parsing fails, use the raw text with a fallback
+          errorMessage = errorText || 'Failed to generate simulation';
+        }
+        
+        throw new Error(errorMessage);
       }
       
-      const data = await response.json();
-      setSimulationText(data.simulationText);
-      setHasStarted(true);
+      let data;
+      try {
+        // Parse the response as JSON
+        data = await response.json();
+      } catch (jsonError) {
+        console.error('Error parsing response as JSON:', jsonError);
+        throw new Error('Invalid response format from server');
+      }
+      
+      // Only set the simulation text if it exists
+      if (data && data.simulationText) {
+        console.log('Simulation data received, length:', data.simulationText.length);
+        setSimulationText(data.simulationText);
+        setHasStarted(true);
+      } else {
+        console.error('Missing simulation text in response:', data);
+        throw new Error('No simulation data received from server');
+      }
     } catch (err) {
       console.error('Error generating simulation:', err);
       setError(err instanceof Error ? err.message : 'An unknown error occurred');

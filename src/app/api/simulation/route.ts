@@ -160,20 +160,30 @@ export async function POST() {
     const maxTokens = parseInt(cookieStore.get('openai_max_tokens')?.value || '4000');
 
     // Use environment variable as fallback if no API key is configured
-    const apiKey = encryptedApiKey 
-      ? decrypt(encryptedApiKey) 
-      : process.env.OPENAI_API_KEY || '';
+    let apiKey = '';
+    
+    try {
+      apiKey = encryptedApiKey 
+        ? decrypt(encryptedApiKey) 
+        : process.env.OPENAI_API_KEY || '';
+        
+      console.log('API key configured successfully:', apiKey ? 'Key is present' : 'No key found');
+    } catch (keyError) {
+      console.error('Error processing API key:', keyError);
+      apiKey = process.env.OPENAI_API_KEY || '';
+      console.log('Fallback to env variable:', apiKey ? 'Env key is present' : 'No env key found');
+    }
 
     if (!apiKey) {
-      console.log('No API key found, using OpenAI API key from environment variable');
-      // Continue with the hardcoded API key from environment
+      console.log('No API key found in cookies or environment variables');
+      return NextResponse.json({ 
+        simulationText: JSON.stringify(EMPTY_TEMPLATE) 
+      });
     }
 
     try {
-      // Always try to generate a new case, even without API key
-      const openai = new OpenAI({ 
-        apiKey: apiKey || 'dummy-key-will-fail-gracefully' 
-      });
+      // Initialize OpenAI client
+      const openai = new OpenAI({ apiKey });
 
       // Select a random variation prompt to create diverse cases
       const variationPrompt = CASE_VARIATION_PROMPTS[Math.floor(Math.random() * CASE_VARIATION_PROMPTS.length)];
@@ -183,184 +193,91 @@ export async function POST() {
       console.log('Max tokens:', maxTokens);
       console.log('Using variation prompt:', variationPrompt);
 
-      const completion = await openai.chat.completions.create({
-        model,
-        messages: [
-          {
-            role: 'system',
-            content: POSH_TRAINING_SIMULATION_PROMPT + "\n\n" + variationPrompt + "\n\n" + FORMAT_GUIDANCE + "\n\nIMPORTANT: Respond with ONLY valid JSON data. Ensure your response is properly formatted as a JSON object without any extra text before or after the JSON data. The JSON must match the SimulationData interface with these fields: caseOverview, complainantStatement, respondentStatement, witnessStatements, additionalEvidence, legalReferenceGuide, correctResponsibleParty, correctMisconductType, correctPrimaryMotivation, and analysis.",
-          },
-        ],
-        temperature,
-        max_tokens: maxTokens,
-        response_format: { type: "json_object" },
-      });
-
-      let simulationText = completion.choices[0]?.message?.content;
-
-      if (!simulationText) {
-        console.log('No simulation text generated, trying again with basic prompt');
-        
-        // Second attempt with simplified prompt
-        const retryCompletion = await openai.chat.completions.create({
+      try {
+        const completion = await openai.chat.completions.create({
           model,
           messages: [
             {
               role: 'system',
-              content: "Create a detailed POSH (Prevention of Sexual Harassment) case simulation in JSON format. Include the following fields: caseOverview, complainantStatement, respondentStatement, witnessStatements, additionalEvidence, legalReferenceGuide, correctResponsibleParty (must be one of: 'Respondent', 'Complainant', 'Both Parties', 'Neither Party'), correctMisconductType (must be one of: 'Sexual Harassment', 'Discrimination', 'Retaliation', 'No Misconduct'), correctPrimaryMotivation (must be one of: 'Genuine Complaint', 'Personal Vendetta', 'Career Advancement', 'Misunderstanding'), and analysis.",
+              content: POSH_TRAINING_SIMULATION_PROMPT + "\n\n" + variationPrompt + "\n\n" + FORMAT_GUIDANCE + "\n\nIMPORTANT: Respond with ONLY valid JSON data. Ensure your response is properly formatted as a JSON object without any extra text before or after the JSON data. The JSON must match the SimulationData interface with these fields: caseOverview, complainantStatement, respondentStatement, witnessStatements, additionalEvidence, legalReferenceGuide, correctResponsibleParty, correctMisconductType, correctPrimaryMotivation, and analysis.",
             },
           ],
-          temperature: 0.9, // Slightly higher temperature for more creativity
+          temperature,
           max_tokens: maxTokens,
           response_format: { type: "json_object" },
         });
-        
-        simulationText = retryCompletion.choices[0]?.message?.content;
+
+        const simulationText = completion.choices[0]?.message?.content;
         
         if (!simulationText) {
-          console.log('Second attempt failed, using empty template');
-          return NextResponse.json({ simulationText: JSON.stringify(EMPTY_TEMPLATE) });
+          console.log('No simulation text generated from first attempt');
+          return NextResponse.json({ 
+            simulationText: JSON.stringify(EMPTY_TEMPLATE) 
+          });
         }
-      }
+        
+        console.log('Simulation text generated successfully');
+        console.log('First 100 characters:', simulationText.substring(0, 100));
 
-      console.log('Simulation text generated successfully');
-      console.log('First 100 characters:', simulationText.substring(0, 100));
-
-      // Validate that the response is valid JSON
-      try {
-        const parsedData = JSON.parse(simulationText);
-        console.log('Simulation data parsed successfully');
-        
-        // Check if the parsed data has the required fields
-        const requiredFields = [
-          'caseOverview', 
-          'complainantStatement', 
-          'respondentStatement', 
-          'witnessStatements',
-          'additionalEvidence', 
-          'legalReferenceGuide', 
-          'correctResponsibleParty', 
-          'correctMisconductType', 
-          'correctPrimaryMotivation', 
-          'analysis'
-        ];
-        
-        const missingFields = requiredFields.filter(field => !(field in parsedData));
-        
-        if (missingFields.length > 0) {
-          console.error('Missing required fields:', missingFields);
-          console.log('Attempting to repair the simulation data');
+        // Validate that the response is valid JSON
+        try {
+          // Just parse to validate, but return original string for client
+          JSON.parse(simulationText);
+          console.log('Simulation data parsed successfully');
           
-          // Try to fix the data instead of using sample data
-          const repairedData = repairSimulationData(parsedData);
+          // Return the simulation text directly
+          return NextResponse.json({ simulationText });
+        } catch (parseError) {
+          console.error('Error parsing API response as JSON:', parseError);
+          console.log('Returning empty template instead');
           
-          // Verify the repaired data is complete
-          if (!verifySimulationData(repairedData)) {
-            console.log('Repaired data is still incomplete, trying one more prompt');
-            
-            // Try one more time with a specific request for witness statements
-            try {
-              const witnessCompletion = await openai.chat.completions.create({
-                model,
-                messages: [
-                  {
-                    role: 'system',
-                    content: "Create 2-3 detailed witness statements for a workplace harassment case. Each statement should include the witness name, role, and a detailed account of what they witnessed. Format as plain text with each witness separated by blank lines.",
-                  }
-                ],
-                temperature: 0.8,
-                max_tokens: 1000,
-              });
-              
-              const witnessText = witnessCompletion.choices[0]?.message?.content;
-              if (witnessText && witnessText.length > 50) {
-                repairedData.witnessStatements = witnessText;
-              }
-            } catch (witnessError) {
-              console.error('Error generating witness statements:', witnessError);
-            }
-          }
-          
-          return NextResponse.json({ simulationText: JSON.stringify(repairedData) });
+          return NextResponse.json({ 
+            simulationText: JSON.stringify(EMPTY_TEMPLATE) 
+          });
         }
+      } catch (openaiError: unknown) {
+        // Enhanced OpenAI API error handling
+        console.error('OpenAI API Error:', openaiError);
         
-        // Validate enum values
-        const validResponsibleParties = ['Respondent', 'Complainant', 'Both Parties', 'Neither Party'];
-        const validMisconductTypes = ['Sexual Harassment', 'Discrimination', 'Retaliation', 'No Misconduct'];
-        const validMotivations = ['Genuine Complaint', 'Personal Vendetta', 'Career Advancement', 'Misunderstanding'];
+        // Check for specific OpenAI error types
+        let errorMessage = 'Unknown error with OpenAI API';
         
-        if (!validResponsibleParties.includes(parsedData.correctResponsibleParty) || 
-            !validMisconductTypes.includes(parsedData.correctMisconductType) || 
-            !validMotivations.includes(parsedData.correctPrimaryMotivation)) {
+        // Type guard for OpenAI API error object
+        if (typeof openaiError === 'object' && openaiError !== null) {
+          const error = openaiError as { status?: number; message?: string };
           
-          console.log('Invalid enum values, repairing data');
-          const repairedData = repairSimulationData(parsedData);
-          return NextResponse.json({ simulationText: JSON.stringify(repairedData) });
-        }
-        
-        // Verify that the data has meaningful content
-        if (!verifySimulationData(parsedData)) {
-          console.log('Parsed data has empty or incomplete fields, repairing data');
-          const repairedData = repairSimulationData(parsedData);
-          
-          // Try to generate witness statements if they're missing or too short
-          if (!parsedData.witnessStatements || 
-              (typeof parsedData.witnessStatements === 'string' && parsedData.witnessStatements.length < 50)) {
-            try {
-              const witnessCompletion = await openai.chat.completions.create({
-                model,
-                messages: [
-                  {
-                    role: 'system',
-                    content: `Based on this case overview: "${parsedData.caseOverview.substring(0, 200)}...", create 2-3 detailed witness statements. Each statement should include the witness name, role, and a detailed account of what they witnessed. Format as plain text with each witness separated by blank lines.`,
-                  }
-                ],
-                temperature: 0.8,
-                max_tokens: 1000,
-              });
-              
-              const witnessText = witnessCompletion.choices[0]?.message?.content;
-              if (witnessText && witnessText.length > 50) {
-                repairedData.witnessStatements = witnessText;
-              }
-            } catch (witnessError) {
-              console.error('Error generating witness statements:', witnessError);
-            }
-          }
-          
-          return NextResponse.json({ simulationText: JSON.stringify(repairedData) });
-        }
-        
-        // Data is valid, return as is
-        return NextResponse.json({ simulationText });
-      } catch (parseError) {
-        console.error('Error parsing simulation data:', parseError);
-        
-        // Try to extract JSON from the response
-        const jsonMatch = simulationText.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          try {
-            const extractedJson = jsonMatch[0];
-            console.log('Extracted JSON from response');
-            const parsedData = JSON.parse(extractedJson);
-            const repairedData = repairSimulationData(parsedData);
-            return NextResponse.json({ simulationText: JSON.stringify(repairedData) });
-          } catch (extractError) {
-            console.error('Failed to extract valid JSON:', extractError);
+          if (error.status === 401) {
+            errorMessage = 'Invalid API key or authentication error with OpenAI';
+          } else if (error.status === 429) {
+            errorMessage = 'Rate limit exceeded or quota used with OpenAI API';
+          } else if (error.status === 500) {
+            errorMessage = 'OpenAI API server error';
+          } else if (error.message) {
+            errorMessage = `OpenAI API error: ${error.message}`;
           }
         }
         
-        console.log('Using empty template instead');
-        return NextResponse.json({ simulationText: JSON.stringify(EMPTY_TEMPLATE) });
+        console.log('Using empty template with error message:', errorMessage);
+        
+        // Always return valid JSON
+        return NextResponse.json({ 
+          simulationText: JSON.stringify(EMPTY_TEMPLATE) 
+        });
       }
-    } catch (openaiError) {
-      console.error('Error with OpenAI API:', openaiError);
-      console.log('Using empty template instead');
-      return NextResponse.json({ simulationText: JSON.stringify(EMPTY_TEMPLATE) });
+    } catch (error) {
+      console.error('Unexpected error generating simulation:', error);
+      console.log('Using empty template due to unexpected error');
+      
+      return NextResponse.json({ 
+        simulationText: JSON.stringify(EMPTY_TEMPLATE) 
+      });
     }
   } catch (error) {
-    console.error('Error generating simulation:', error);
-    console.log('Using empty template due to error');
-    return NextResponse.json({ simulationText: JSON.stringify(EMPTY_TEMPLATE) });
+    console.error('Critical error in simulation API route:', error);
+    
+    // Even in the case of a critical error, return valid JSON
+    return NextResponse.json({ 
+      simulationText: JSON.stringify(EMPTY_TEMPLATE) 
+    });
   }
 } 
