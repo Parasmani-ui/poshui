@@ -50,6 +50,7 @@ Format guidance:
 `;
 
 // Function to fix or complete missing fields in simulation data
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function repairSimulationData(data: Partial<SimulationData>): SimulationData {
   // Create a new object with the template structure
   const repairedData: SimulationData = { ...EMPTY_TEMPLATE };
@@ -121,6 +122,7 @@ function repairSimulationData(data: Partial<SimulationData>): SimulationData {
 }
 
 // Verify that simulation data has all required sections with actual content
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function verifySimulationData(data: SimulationData): boolean {
   // Check if all required fields are present and have meaningful content
   if (!data.caseOverview || data.caseOverview.length < 20) return false;

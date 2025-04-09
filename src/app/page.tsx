@@ -33,7 +33,7 @@ export default function Home() {
           if (errorData.error) {
             errorMessage = errorData.error;
           }
-        } catch (e) {
+        } catch {
           // If parsing fails, use the raw text with a fallback
           errorMessage = errorText || 'Failed to generate simulation';
         }
