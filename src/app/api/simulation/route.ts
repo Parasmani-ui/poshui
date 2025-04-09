@@ -185,7 +185,11 @@ export async function POST() {
 
     try {
       // Initialize OpenAI client
-      const openai = new OpenAI({ apiKey });
+      const openai = new OpenAI({ 
+        apiKey,
+        timeout: 15000, // 15 seconds timeout to prevent function timeout in Vercel
+        maxRetries: 1,  // Limit retries to avoid prolonged execution
+      });
 
       // Select a random variation prompt to create diverse cases
       const variationPrompt = CASE_VARIATION_PROMPTS[Math.floor(Math.random() * CASE_VARIATION_PROMPTS.length)];
@@ -195,8 +199,14 @@ export async function POST() {
       console.log('Max tokens:', maxTokens);
       console.log('Using variation prompt:', variationPrompt);
 
+      // Use Promise.race to implement a timeout
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('OpenAI API call timed out')), 25000); // 25 seconds timeout
+      });
+
       try {
-        const completion = await openai.chat.completions.create({
+        // Race between the API call and the timeout
+        const completionPromise = openai.chat.completions.create({
           model,
           messages: [
             {
@@ -209,10 +219,16 @@ export async function POST() {
           response_format: { type: "json_object" },
         });
 
+        // Wait for either the completion or the timeout
+        const completion = await Promise.race([
+          completionPromise,
+          timeoutPromise
+        ]) as OpenAI.Chat.Completions.ChatCompletion;
+
         const simulationText = completion.choices[0]?.message?.content;
         
         if (!simulationText) {
-          console.log('No simulation text generated from first attempt');
+          console.log('No simulation text generated from OpenAI');
           return NextResponse.json({ 
             simulationText: JSON.stringify(EMPTY_TEMPLATE) 
           });
@@ -237,47 +253,48 @@ export async function POST() {
             simulationText: JSON.stringify(EMPTY_TEMPLATE) 
           });
         }
-      } catch (openaiError: unknown) {
-        // Enhanced OpenAI API error handling
-        console.error('OpenAI API Error:', openaiError);
+      } catch (timeoutError) {
+        // Handle timeout specific error
+        console.error('Request timed out or was aborted:', timeoutError);
+        console.log('Using empty template due to timeout');
         
-        // Check for specific OpenAI error types
-        let errorMessage = 'Unknown error with OpenAI API';
-        
-        // Type guard for OpenAI API error object
-        if (typeof openaiError === 'object' && openaiError !== null) {
-          const error = openaiError as { status?: number; message?: string };
-          
-          if (error.status === 401) {
-            errorMessage = 'Invalid API key or authentication error with OpenAI';
-          } else if (error.status === 429) {
-            errorMessage = 'Rate limit exceeded or quota used with OpenAI API';
-          } else if (error.status === 500) {
-            errorMessage = 'OpenAI API server error';
-          } else if (error.message) {
-            errorMessage = `OpenAI API error: ${error.message}`;
-          }
-        }
-        
-        console.log('Using empty template with error message:', errorMessage);
-        
-        // Always return valid JSON
         return NextResponse.json({ 
           simulationText: JSON.stringify(EMPTY_TEMPLATE) 
         });
       }
-    } catch (error) {
-      console.error('Unexpected error generating simulation:', error);
-      console.log('Using empty template due to unexpected error');
+    } catch (openaiError: unknown) {
+      // Enhanced OpenAI API error handling
+      console.error('OpenAI API Error:', openaiError);
       
+      // Check for specific OpenAI error types
+      let errorMessage = 'Unknown error with OpenAI API';
+      
+      // Type guard for OpenAI API error object
+      if (typeof openaiError === 'object' && openaiError !== null) {
+        const error = openaiError as { status?: number; message?: string };
+        
+        if (error.status === 401) {
+          errorMessage = 'Invalid API key or authentication error with OpenAI';
+        } else if (error.status === 429) {
+          errorMessage = 'Rate limit exceeded or quota used with OpenAI API';
+        } else if (error.status === 500) {
+          errorMessage = 'OpenAI API server error';
+        } else if (error.message) {
+          errorMessage = `OpenAI API error: ${error.message}`;
+        }
+      }
+      
+      console.log('Using empty template with error message:', errorMessage);
+      
+      // Always return valid JSON
       return NextResponse.json({ 
         simulationText: JSON.stringify(EMPTY_TEMPLATE) 
       });
     }
   } catch (error) {
-    console.error('Critical error in simulation API route:', error);
+    console.error('Unexpected error generating simulation:', error);
+    console.log('Using empty template due to unexpected error');
     
-    // Even in the case of a critical error, return valid JSON
     return NextResponse.json({ 
       simulationText: JSON.stringify(EMPTY_TEMPLATE) 
     });

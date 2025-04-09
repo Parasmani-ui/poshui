@@ -14,13 +14,21 @@ export default function Home() {
     setIsLoading(true);
     setError(null);
     
+    // Create an AbortController to handle request timeouts
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    
     try {
       const response = await fetch('/api/simulation', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        signal: controller.signal,
       });
+      
+      // Clear the timeout since request completed
+      clearTimeout(timeoutId);
       
       // Handle non-200 responses
       if (!response.ok) {
@@ -60,8 +68,17 @@ export default function Home() {
         throw new Error('No simulation data received from server');
       }
     } catch (err) {
+      // Clear the timeout in case of error
+      clearTimeout(timeoutId);
+      
       console.error('Error generating simulation:', err);
-      setError(err instanceof Error ? err.message : 'An unknown error occurred');
+      
+      // Special handling for AbortError (timeout)
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        setError('Request timed out. The server is taking too long to respond. Please try again later.');
+      } else {
+        setError(err instanceof Error ? err.message : 'An unknown error occurred');
+      }
     } finally {
       setIsLoading(false);
     }
