@@ -3,7 +3,7 @@ export interface SimulationResponse {
   error?: string;
 }
 
-export type SimulationSection = 'overview' | 'complainant' | 'respondent' | 'witnesses' | 'evidence' | 'legal' | 'conclusion';
+export type SimulationSection = 'overview' | 'complainant' | 'respondent' | 'evidence' | 'legal' | 'conclusion';
 
 export type ResponsibleParty = 'Respondent' | 'Complainant' | 'Both Parties' | 'Neither Party';
 
@@ -26,7 +26,7 @@ export interface SimulationData {
   caseOverview: string;
   complainantStatement: string;
   respondentStatement: string;
-  witnessStatements: string | WitnessStatement[] | Record<string, string>;
+  witnessStatements?: string | WitnessStatement[] | Record<string, string>;
   additionalEvidence: string;
   legalReferenceGuide: string;
   correctResponsibleParty: ResponsibleParty;

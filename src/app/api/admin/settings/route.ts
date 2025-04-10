@@ -62,7 +62,8 @@ export async function GET() {
     const cookieStore = await cookies();
     
     const encryptedApiKey = cookieStore.get('openai_api_key')?.value;
-    const model = cookieStore.get('openai_model')?.value || 'gpt-4o-mini';
+    //const model = cookieStore.get('openai_model')?.value || 'gpt-4o-mini';
+    const model = cookieStore.get('openai_model')?.value || 'gpt-4o';
     const temperature = parseFloat(cookieStore.get('openai_temperature')?.value || '0.8');
     const maxTokens = parseInt(cookieStore.get('openai_max_tokens')?.value || '4000');
 
