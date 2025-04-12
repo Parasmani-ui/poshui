@@ -1,48 +1,6 @@
 {
-  "lastUpdated": "2025-04-10T09:52:19.450Z",
+  "lastUpdated": "2025-04-12T09:21:03.967Z",
   "cases": [
-    {
-      "data": {
-        "caseOverview": "Amita works as a senior HR manager in a reputed IT company in Bangalore. She has been consistently praised for her professionalism and dedication to her work. However, she recently filed a sexual harassment complaint against her colleague, Ravi, a senior project manager in the same company. The case has raised concerns within the organization and requires a thorough investigation in line with the POSH Act of 2013.",
-        "complainantStatement": "Amita stated that Ravi has been making inappropriate comments about her appearance and has been sending her suggestive emails outside of work hours. She mentioned feeling uncomfortable and harassed by his actions, which have been ongoing for the past few months. She also stated that she tried to ignore his advances initially but decided to speak up when the behavior persisted.",
-        "respondentStatement": "Ravi denied the allegations, stating that his interactions with Amita were always professional and work-related. He claimed that any comments he made were in the context of work projects and were not meant to be taken in a suggestive or inappropriate manner. Ravi mentioned that he was shocked by the accusations and believed that Amita might have misunderstood his intentions.",
-        "additionalEvidence": "One of the ambiguous pieces of evidence is a series of text messages exchanged between Amita and Ravi. While some messages are clearly work-related, there are a few that could be interpreted as flirtatious or suggestive. The tone and context of these messages could play a crucial role in determining the nature of their relationship.",
-        "legalReferenceGuide": "According to the POSH Act of 2013, Section 2(n) defines sexual harassment as unwelcome sexually determined behavior such as physical contact and advances, demand or request for sexual favors, making sexually colored remarks, showing pornography, or any other unwelcome physical, verbal, or non-verbal conduct of a sexual nature.",
-        "correctResponsibleParty": "Both Parties",
-        "correctMisconductType": "Sexual Harassment",
-        "correctPrimaryMotivation": "Misunderstanding",
-        "analysis": "In this case, both Amita and Ravi have presented conflicting statements, making it challenging to determine the exact nature of their interactions. The ambiguous text messages add another layer of complexity to the case, as they could be interpreted differently based on the context. Given the lack of clear evidence pointing definitively to either party's guilt or innocence, both Amita and Ravi share responsibility in this situation. The primary motivation behind the complaint seems to stem from a misunderstanding between the two parties, highlighting the importance of clear communication and boundaries in the workplace."
-      },
-      "addedAt": "2025-04-10T09:01:59.045Z"
-    },
-    {
-      "data": {
-        "caseOverview": "In a leading IT company in India, a female employee, Ms. Rhea, lodged a complaint with the HR department against her male colleague, Mr. Aryan, alleging sexual harassment. The company has a strict policy adhering to the Prevention of Sexual Harassment (POSH) Act of 2013, and the HR team is tasked with investigating the matter thoroughly.",
-        "complainantStatement": "Ms. Rhea stated that Mr. Aryan made inappropriate comments about her appearance, touched her inappropriately on multiple occasions during office hours, and sent her suggestive messages on the company's internal chat platform. She expressed feeling uncomfortable and harassed by his actions and feared for her safety at the workplace.",
-        "respondentStatement": "Mr. Aryan denied all allegations made by Ms. Rhea. He claimed that their interactions were professional and friendly, with no intention of causing discomfort or offense. He mentioned that any physical contact was accidental, and the messages sent were misinterpreted by Ms. Rhea.",
-        "additionalEvidence": "During the investigation, the HR team found a series of emails exchanged between Ms. Rhea and Mr. Aryan that seemed to show a friendly and jovial relationship. However, some of the language used in the emails could be interpreted as flirtatious or suggestive, adding complexity to the case.",
-        "legalReferenceGuide": "As per the POSH Act of 2013, Section 2(n) defines sexual harassment as unwelcome sexually determined behavior, whether directly or by implication. Section 3 of the Act mandates the formation of Internal Complaints Committee (ICC) in every organization to address complaints of sexual harassment.",
-        "correctResponsibleParty": "Both Parties",
-        "correctMisconductType": "Sexual Harassment",
-        "correctPrimaryMotivation": "Misunderstanding",
-        "analysis": "The evidence in this case presents a nuanced scenario where the interactions between Ms. Rhea and Mr. Aryan could be perceived differently based on individual perspectives. While Ms. Rhea felt harassed and uncomfortable, Mr. Aryan maintained that his actions were not intended to cause harm. The ambiguous nature of the emails adds a layer of complexity to the case, highlighting the importance of thorough investigation and understanding context in addressing complaints of sexual harassment. In this case, both parties share responsibility for the misunderstanding that led to the complaint, and the primary motivation behind the allegations appears to stem from a misunderstanding rather than malice or personal vendetta."
-      },
-      "addedAt": "2025-04-10T09:23:57.578Z"
-    },
-    {
-      "data": {
-        "caseOverview": "In a multinational company in India, a female employee named Maya has filed a complaint of sexual harassment against her male colleague, Raj. The company has initiated an internal investigation to address the matter in accordance with the Prevention of Sexual Harassment (POSH) Act of 2013.",
-        "complainantStatement": "Maya states that Raj has been making unwanted advances towards her, such as sending inappropriate text messages and making suggestive comments during office meetings. She feels uncomfortable and harassed by his behavior, which has been ongoing for several weeks. Maya has repeatedly asked Raj to stop, but he continues to persist, creating a hostile work environment for her.",
-        "respondentStatement": "Raj denies Maya's allegations and claims that their interactions have been friendly and consensual. He argues that the text messages were taken out of context and were meant as harmless jokes. Raj states that Maya never clearly communicated her discomfort, and he is shocked by the sudden complaint against him.",
-        "additionalEvidence": "During the investigation, the HR team discovers a series of emails exchanged between Maya and Raj, where they appear to engage in casual banter and use emojis that could be interpreted as flirtatious. The tone of the emails is light-hearted, and there is no explicit mention of harassment. However, some phrases could be perceived as crossing professional boundaries.",
-        "legalReferenceGuide": "As per the POSH Act of 2013, Section 2(n) defines 'sexual harassment' to include unwelcome sexually determined behavior, whether directly or by implication. Section 4 mandates the constitution of Internal Complaints Committees (ICCs) in organizations to address complaints of sexual harassment. Section 11 states that the ICC shall provide for conciliation if requested by the complainant.",
-        "correctResponsibleParty": "Both Parties",
-        "correctMisconductType": "Sexual Harassment",
-        "correctPrimaryMotivation": "Misunderstanding",
-        "analysis": "The case presents a scenario where both Maya and Raj have differing perspectives on the nature of their interactions. While Maya perceives Raj's behavior as harassment, Raj views it as friendly banter. The additional evidence of the emails complicates the situation, as it could be interpreted in multiple ways. In this case, both parties share responsibility for the misunderstanding that has led to a hostile work environment for Maya. The primary motivation behind the complaint appears to stem from a misunderstanding of intentions rather than a deliberate act of harassment."
-      },
-      "addedAt": "2025-04-10T09:27:53.808Z"
-    },
     {
       "data": {
         "caseOverview": "In a multinational corporation in India, a female employee has filed a complaint of sexual harassment against her male supervisor. The company has strict policies in place to prevent sexual harassment and has initiated an investigation into the matter.",
@@ -126,6 +84,62 @@
         "analysis": "In this case, both parties share some responsibility. While Ms. Rhea's discomfort and allegations raise serious concerns of sexual harassment, the ambiguous nature of the email evidence and Mr. Arjun's denial require a thorough investigation. The primary motivation behind the complaint appears to be a misunderstanding due to differing perceptions of their interactions. It is crucial for the HR professionals to conduct a detailed inquiry and follow the provisions of the POSH Act to ensure a fair and just resolution."
       },
       "addedAt": "2025-04-10T09:52:19.450Z"
+    },
+    {
+      "data": {
+        "caseOverview": "Anita, a junior marketing executive at XYZ Corp, alleges that her manager, Raj, made inappropriate comments about her attire during a team meeting. According to Anita, Raj suggested that her 'provocative dressing' was distracting male colleagues, implying that she should dress more conservatively. Anita felt degraded and believes this was a form of sexual harassment intended to undermine her confidence and position in the team.",
+        "complainantStatement": "Anita states, 'Raj's comments were humiliating. He laughed while saying them, which made me feel like a joke in front of the team. It wasn't just about the dress; it was about making me look unprofessional.'",
+        "respondentStatement": "Raj claims, 'I never intended to harass Anita. I was merely pointing out our company's dress code. It was a general remark, not aimed at her specifically. It was meant to maintain professionalism, not offend.'",
+        "additionalEvidence": "An email from Raj to the team, sent prior to the meeting, mentioning a reminder about adhering to the company's dress code, but without specific references to any individual.",
+        "legalReferenceGuide": "Section 3(1) of the POSH Act prohibits unwelcome sexually determined behavior at the workplace.",
+        "correctResponsibleParty": "Respondent",
+        "correctMisconductType": "Sexual Harassment",
+        "correctPrimaryMotivation": "Gender-based prejudice",
+        "analysis": "Raj's comments during the meeting were targeted and gender-specific, suggesting a bias against Anita based on her attire, which constitutes harassment under the POSH Act. The prior email does not negate the personal nature of the comments made in the meeting."
+      },
+      "addedAt": "2025-04-12T08:54:18.306Z"
+    },
+    {
+      "data": {
+        "caseOverview": "In a mid-sized tech company, Priya, a junior developer, alleges that her team lead, Vikram, has been making inappropriate comments about her attire and appearance during team meetings. Priya claims that Vikram's comments have created a hostile work environment for her. The alleged incidents occurred over several weeks and were witnessed by other team members. Vikram denies the allegations, asserting that his comments were professional and meant to provide constructive feedback about workplace presentation. Priya believes Vikram's behavior stems from a gender-based prejudice, as he has not made similar comments to male team members.",
+        "complainantStatement": "Priya asserts that Vikram frequently commented on her clothing, saying things like, 'You should dress more professionally, like the men here,' which made her uncomfortable. She feels singled out due to her gender and has been anxious about attending meetings.",
+        "respondentStatement": "Vikram claims his comments were strictly professional, meant to guide Priya on corporate dress code standards. He states, 'I never intended to make her uncomfortable, and I believe I was fair in my feedback to all team members.'",
+        "additionalEvidence": "An email from Vikram to Priya, stating, 'I hope you understand my feedback is for your benefit, so you fit in well with the team culture.'",
+        "legalReferenceGuide": "Under the POSH Act, Section 2(n) defines sexual harassment and Sections 3(1) and 3(2) outline employer responsibilities to prevent such conduct.",
+        "correctResponsibleParty": "Respondent",
+        "correctMisconductType": "Sexual Harassment",
+        "correctPrimaryMotivation": "Gender-based prejudice",
+        "analysis": "Vikram's comments, although framed as professional feedback, were directed only at Priya and not her male counterparts, indicating a potential gender bias. The email, while seemingly supportive, reinforces the unequal treatment based on gender, aligning with Priya’s claims."
+      },
+      "addedAt": "2025-04-12T08:55:12.943Z"
+    },
+    {
+      "data": {
+        "caseOverview": "In a mid-sized marketing firm, Priya, a junior marketing executive, alleges sexual harassment by her team leader, Amit. Priya claims that Amit has been making inappropriate comments and gestures towards her during team meetings. The alleged incidents began after Priya received a commendation from the company CEO for a successful campaign, which Amit had also been working on. Priya believes Amit's behavior is driven by jealousy and gender-based prejudice, as she is the only woman on the team.",
+        "complainantStatement": "Priya claims Amit started making comments about her appearance and implied that her success was due to favoritism from male executives. She recounts an incident where Amit brushed against her unnecessarily during a team celebration, making her uncomfortable.",
+        "respondentStatement": "Amit denies the allegations, stating that his comments were professional and not meant to offend. He argues that Priya misinterpreted his actions and that he has always supported her career growth. He suggests the allegations stem from a miscommunication.",
+        "additionalEvidence": "An email from Amit to Priya saying, 'Your recent work has been impressive, but remember who leads the team,' which could be interpreted as supportive or condescending.",
+        "legalReferenceGuide": "The POSH Act defines sexual harassment and mandates a safe workplace environment, focusing on Section 2(n) for definitions and Sections 3(1) & 3(2) for the prohibition of harassment.",
+        "correctResponsibleParty": "Respondent",
+        "correctMisconductType": "Sexual Harassment",
+        "correctPrimaryMotivation": "Jealousy",
+        "analysis": "The evidence suggests a pattern of dismissive behavior rooted in jealousy, aligning with Priya's claims of inappropriate conduct by Amit."
+      },
+      "addedAt": "2025-04-12T09:02:23.430Z"
+    },
+    {
+      "data": {
+        "caseOverview": "In a mid-sized tech company, Jane, a junior software developer, filed a complaint against Mark, a senior project manager. Jane alleges that Mark made inappropriate comments about her appearance during team meetings and implied that her career progression depended on her acceptance of his advances. Mark has been known for his strict management style, often leading high-profile projects. Jane believes Mark's actions stem from a desire to assert power over junior employees.",
+        "complainantStatement": "Jane stated, 'Mark often commented on how I dressed and once said, 'If you want to get ahead here, you need to be more...flexible.' I felt uncomfortable, and it seemed like he was suggesting something inappropriate.'",
+        "respondentStatement": "Mark responded, 'I never made such comments. I maintain a professional relationship with all my team members. Jane might have misunderstood my feedback about team collaboration.'",
+        "additionalEvidence": "An email from Mark to Jane reads, 'Your contributions are valued, but remember, fitting into the team culture is crucial for your future here.'",
+        "legalReferenceGuide": "Section 2(n) defines sexual harassment, Section 3(1) prohibits it, and Section 3(2) outlines employer obligations.",
+        "correctResponsibleParty": "Respondent",
+        "correctMisconductType": "Sexual Harassment",
+        "correctPrimaryMotivation": "Power preservation",
+        "analysis": "The email suggests Mark's emphasis on 'fitting into the team culture,' which could be interpreted as a subtle form of coercion, aligning with Jane's claims of implicit threats to her career progression."
+      },
+      "addedAt": "2025-04-12T09:21:03.967Z"
     }
   ]
 }

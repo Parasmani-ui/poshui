@@ -9,7 +9,11 @@ export type ResponsibleParty = 'Respondent' | 'Complainant' | 'Both Parties' | '
 
 export type MisconductType = 'Sexual Harassment' | 'Discrimination' | 'Retaliation' | 'No Misconduct';
 
-export type PrimaryMotivation = 'Genuine Complaint' | 'Personal Vendetta' | 'Career Advancement' | 'Misunderstanding';
+export type PrimaryMotivation = 
+  // New motivations based on SCENARIO_GENERATION
+  'Power preservation' | 'Retaliation' | 'Jealousy' | 'Gender-based prejudice' |
+  // Original motivations for backward compatibility
+  'Genuine Complaint' | 'Personal Vendetta' | 'Career Advancement' | 'Misunderstanding';
 
 export interface ConclusionData {
   responsibleParty: ResponsibleParty;

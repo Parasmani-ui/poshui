@@ -61,7 +61,13 @@ function repairSimulationData(data: Partial<SimulationData>): SimulationData {
       repairedData.correctMisconductType = data.correctMisconductType as MisconductType;
     }
     
-    if (['Genuine Complaint', 'Personal Vendetta', 'Career Advancement', 'Misunderstanding'].includes(data.correctPrimaryMotivation || '')) {
+    // Updated to include SCENARIO_GENERATION motivations
+    const validMotivations = [
+      'Power preservation', 'Retaliation', 'Jealousy', 'Gender-based prejudice',
+      'Genuine Complaint', 'Personal Vendetta', 'Career Advancement', 'Misunderstanding'
+    ];
+    
+    if (validMotivations.includes(data.correctPrimaryMotivation || '')) {
       repairedData.correctPrimaryMotivation = data.correctPrimaryMotivation as PrimaryMotivation;
     }
     
@@ -86,7 +92,10 @@ function verifySimulationData(data: SimulationData): boolean {
   // Check if enum values are valid
   const validResponsibleParties = ['Respondent', 'Complainant', 'Both Parties', 'Neither Party'];
   const validMisconductTypes = ['Sexual Harassment', 'Discrimination', 'Retaliation', 'No Misconduct'];
-  const validMotivations = ['Genuine Complaint', 'Personal Vendetta', 'Career Advancement', 'Misunderstanding'];
+  const validMotivations = [
+    'Power preservation', 'Retaliation', 'Jealousy', 'Gender-based prejudice',
+    'Genuine Complaint', 'Personal Vendetta', 'Career Advancement', 'Misunderstanding'
+  ];
   
   if (!validResponsibleParties.includes(data.correctResponsibleParty)) return false;
   if (!validMisconductTypes.includes(data.correctMisconductType)) return false;
@@ -101,6 +110,29 @@ export async function POST() {
     const cookieStore = await cookies();
     const encryptedApiKey = cookieStore.get('openai_api_key')?.value;
     const temperature = parseFloat(cookieStore.get('openai_temperature')?.value || '0.8');
+
+    // Check if we're in a Vercel environment
+    const isVercelProduction = process.env.VERCEL_ENV === 'production';
+    
+    // First try to get a case from cache as a quick option - prioritize this in Vercel environment
+    const cachedCase = getRandomCaseFromCache();
+    
+    // In Vercel production, prefer using cached cases to avoid timeouts (95% chance)
+    if (isVercelProduction && cachedCase && Math.random() < 0.95) {
+      console.log('In Vercel production - using cached case to avoid timeout');
+      return NextResponse.json({ 
+        simulationText: JSON.stringify(cachedCase)
+      });
+    }
+    
+    // If we're in Vercel production but don't have a cache, use the template
+    // 90% of the time to avoid timeouts
+    if (isVercelProduction && !cachedCase && Math.random() < 0.9) {
+      console.log('In Vercel production with no cache - using template to avoid timeout');
+      return NextResponse.json({ 
+        simulationText: JSON.stringify(EMPTY_TEMPLATE)
+      });
+    }
 
     // Use environment variable as fallback if no API key is configured
     let apiKey = '';
@@ -137,60 +169,71 @@ export async function POST() {
     console.log('Max tokens:', reducedMaxTokens);
 
     try {
-      // First try to get a case from cache as a quick option
-      const cachedCase = getRandomCaseFromCache();
-      
-      // 20% chance to use cache if available (to mix fresh and cached content)
-      if (cachedCase && Math.random() < 0.2) {
-        console.log('Using cached case for better performance');
-        return NextResponse.json({ 
-          simulationText: JSON.stringify(cachedCase)
-        });
-      }
-      
       // Initialize OpenAI client
       const openai = new OpenAI({ 
         apiKey,
-        timeout: 30000, // 30 seconds timeout (increased from 12000)
-        maxRetries: 2,  // Allow some retries
+        timeout: isVercelProduction ? 8000 : 20000, // Even shorter timeout for Vercel
+        maxRetries: isVercelProduction ? 0 : 1, // No retries in Vercel to save time
       });
 
-      // Use Promise.race to implement a timeout
+      // Use Promise.race to implement a timeout - shorter for Vercel
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('OpenAI API call timed out')), 25000); // 25 seconds timeout (increased from 15000)
+        setTimeout(
+          () => reject(new Error('OpenAI API call timed out')), 
+          isVercelProduction ? 6000 : 15000 // Much shorter timeout for Vercel
+        );
       });
+      
+      // Set a global timeout for the entire API route in Vercel to ensure we respond
+      // well before the 60-second limit
+      let vercelTimeoutId: NodeJS.Timeout | null = null;
+      if (isVercelProduction) {
+        vercelTimeoutId = setTimeout(() => {
+          console.log('Vercel global timeout triggered - returning template');
+          // Just throw an error that will be caught by the outer catch block
+          throw new Error('Vercel global timeout');
+        }, 30000); // 30 seconds is still safe within 60-second limit
+      }
 
       try {
         console.log('Starting OpenAI API request...');
         
-        // Use a simplified prompt to reduce token usage and processing time
+        // Further simplify the prompt to get faster responses
         const simplifiedPrompt = `
-Create a POSH (Prevention of Sexual Harassment) training case for HR professionals in India based on the 2013 POSH Act. Include:
-1. Clear case overview with background information
-2. Detailed complainant statement
-3. Detailed respondent statement
-4. One piece of additional evidence that is ambiguous and open to interpretation
-5. Legal reference to relevant POSH Act sections
-6. Answer key with correct responsible party, misconduct type, and primary motivation
-7. Analysis of the case (only shown after user submission)
+<SCENARIO_GENERATION> 
+Each scenario must: 
+- Be based on the Sexual Harassment of Women at Workplace (Prevention, Prohibition and Redressal) Act, 2013, especially Sections 2(n), 3(1), and 3(2). 
+- Contain exactly ONE potential VICTIM AND RESPONDENT whose core motivation is chosen from: Power preservation, Retaliation, Jealousy, or Gender-based prejudice.
+- Decide whether the POSH complaint is TRUE or FALSE (50:50 chance).
 
-Format as a JSON object exactly as follows:
+The simulation should include:
+1. INCIDENT BACKGROUND (150-200 words) - Outline roles, incident details and allegations.
+2. STATEMENTS FROM PARTIES - Brief but nuanced testimonies with subtle contradictions or emotional cues.
+3. ADDITIONAL EVIDENCE - One ambiguous artifact (email, Slack message) that subtly supports or challenges the allegations.
+</SCENARIO_GENERATION>
+
+Format as JSON:
 {
-  "caseOverview": "string",
-  "complainantStatement": "string",
-  "respondentStatement": "string",
-  "additionalEvidence": "string",
-  "legalReferenceGuide": "string",
-  "correctResponsibleParty": "string", (one of: "Respondent", "Complainant", "Both Parties", "Neither Party")
-  "correctMisconductType": "string", (one of: "Sexual Harassment", "Discrimination", "Retaliation", "No Misconduct")  
-  "correctPrimaryMotivation": "string", (one of: "Genuine Complaint", "Personal Vendetta", "Career Advancement", "Misunderstanding")
-  "analysis": "string"
+  "caseOverview": "Incident background...",
+  "complainantStatement": "Complainant testimony...",
+  "respondentStatement": "Respondent defense...",
+  "additionalEvidence": "Ambiguous evidence...",
+  "legalReferenceGuide": "Brief POSH Act reference...",
+  "correctResponsibleParty": "Respondent|Complainant|Both Parties|Neither Party",
+  "correctMisconductType": "Sexual Harassment|Discrimination|Retaliation|No Misconduct",
+  "correctPrimaryMotivation": "Power preservation|Retaliation|Jealousy|Gender-based prejudice",
+  "analysis": "Brief analysis..."
 }
+
+Keep all sections concise to allow for faster generation.
 `;
 
+        // If we're in Vercel, prioritize using the cache even for API request
+        const modelToUse = isVercelProduction ? "gpt-4o-mini" : "gpt-4o";
+        
         // Race between the API call and the timeout
         const completionPromise = openai.chat.completions.create({
-          model: "gpt-3.5-turbo", // Using GPT-3.5 which is faster and more reliable than GPT-4
+          model: modelToUse,
           messages: [
             {
               role: 'system',
@@ -198,11 +241,11 @@ Format as a JSON object exactly as follows:
             },
             {
               role: 'user',
-              content: "Generate a realistic POSH case with nuanced evidence that requires careful application of the POSH Act.",
+              content: "Generate a POSH case focusing on quality but keeping it concise to work within time constraints.",
             }
           ],
           temperature: 0.7,
-          max_tokens: 2500, // Reduced token count for faster response
+          max_tokens: isVercelProduction ? 1200 : 1500, // Even smaller for Vercel
           response_format: { type: "json_object" },
         });
 
@@ -252,15 +295,30 @@ Format as a JSON object exactly as follows:
             }
           }
           
+          // Clear Vercel timeout if it exists
+          if (vercelTimeoutId) {
+            clearTimeout(vercelTimeoutId);
+          }
+          
           // Return the simulation text directly
           return NextResponse.json({ simulationText });
         } catch (parseError) {
+          // Clear Vercel timeout if it exists
+          if (vercelTimeoutId) {
+            clearTimeout(vercelTimeoutId);
+          }
+          
           console.error('Error parsing API response as JSON:', parseError);
           return NextResponse.json({ 
             simulationText: JSON.stringify(EMPTY_TEMPLATE) 
           });
         }
       } catch (timeoutError) {
+        // Clear Vercel timeout if it exists
+        if (vercelTimeoutId) {
+          clearTimeout(vercelTimeoutId);
+        }
+        
         // Handle timeout specific error
         console.error('Request timed out or was aborted:', timeoutError);
         console.log('Checking cache for fallback case');
